@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/index.dart';
@@ -15,10 +16,16 @@ class _GamePageState extends State<GamePage> {
 
   @override
   Widget build(BuildContext context) {
+    Map playerNames = ModalRoute.of(context).settings.arguments;
     return BlocConsumer<GameBloc, GameState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is GameFinished) {
-          Navigator.of(context).pushReplacementNamed("/gameOverPage");
+          await SystemChannels.platform
+              .invokeMethod<void>('HapticFeedback.heavyImpact');
+          await SystemChannels.platform
+              .invokeMethod<void>('HapticFeedback.vibrate');
+          Navigator.of(context)
+              .pushReplacementNamed("/gameOverPage", arguments: playerNames);
         }
       },
       builder: (context, state) {
@@ -26,46 +33,47 @@ class _GamePageState extends State<GamePage> {
           PlayerIcon player1 = PlayerIcon(
             key: player1IconKey,
             playerNumber: state.players[0].playerNumber,
-            playerName: "Player 1",
+            playerName: playerNames['player1Name'] ?? "🍑",
             playerMark: state.players[0].playerMark,
             initialPlayerState: (state.currentPlayerIndex == 0),
           );
           PlayerIcon player2 = PlayerIcon(
             key: player2IconKey,
             playerNumber: state.players[1].playerNumber,
-            playerName: "Player 2",
+            playerName: playerNames['player2Name'] ?? "🍑",
             playerMark: state.players[1].playerMark,
             initialPlayerState: (state.currentPlayerIndex == 1),
           );
 
           return Scaffold(
             body: SafeArea(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Expanded(
+              child: Column(
+                children: <Widget>[
+                  Flexible(
+                    flex: 3,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Flexible(child: player1),
+                        Flexible(child: player2),
+                      ],
+                    ),
+                  ),
+                  Flexible(
+                    flex: 5,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Container(
+                        child: GameGrid(),
+                      ),
+                    ),
+                  ),
+                  Expanded(
                       flex: 2,
-                      child: Row(
-                        children: [
-                          Expanded(child: player1),
-                          Expanded(child: player2),
-                        ],
-                      ),
-                    ),
-                    Flexible(
-                      flex: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Container(
-                          child: GameGrid(),
-                        ),
-                      ),
-                    ),
-                    Expanded(child: RestartButton())
-                  ],
-                ),
+                      child: Align(
+                          alignment: Alignment.topCenter,
+                          child: RestartButton()))
+                ],
               ),
             ),
           );

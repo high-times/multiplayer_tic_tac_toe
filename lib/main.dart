@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:page_transition/page_transition.dart';
 
 import 'bloc/index.dart';
 import 'views/index.dart';
 
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MyApp());
+  });
 }
 
 class SimpleBlocDelegate extends BlocDelegate {
@@ -36,16 +42,52 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => GameBloc(),
-      child: MaterialApp(
-        theme: ThemeData(
-          primarySwatch: Colors.red,
-        ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => StartPage(),
-          '/gamePage': (context) => GamePage(),
-          '/gameOverPage': (context) => GameOverPage()
+      child: GestureDetector(
+        onTap: () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
         },
+        child: MaterialApp(
+          theme: ThemeData(
+            primarySwatch: Colors.red,
+            fontFamily: 'Permanent Marker',
+          ),
+          initialRoute: '/',
+          onGenerateRoute: (settings) {
+            switch (settings.name) {
+              case '/':
+                return PageTransition(
+                  child: StartPage(),
+                  type: PageTransitionType.fade,
+                  duration: Duration(milliseconds: 50),
+                  settings: settings,
+                );
+                break;
+              case '/gamePage':
+                return PageTransition(
+                  child: GamePage(),
+                  duration: Duration(milliseconds: 50),
+                  type: PageTransitionType.fade,
+                  settings: settings,
+                );
+                break;
+              case '/gameOverPage':
+                return PageTransition(
+                  child: GameOverPage(),
+                  type: PageTransitionType.scale,
+                  alignment: Alignment.center,
+                  duration: Duration(milliseconds: 500),
+                  settings: settings,
+                );
+                break;
+              default:
+                return null;
+            }
+          },
+        ),
       ),
     );
   }

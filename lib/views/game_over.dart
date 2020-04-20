@@ -5,6 +5,7 @@ import 'package:multiplayer_tic_tac_toe/bloc/index.dart';
 import 'package:multiplayer_tic_tac_toe/models/index.dart';
 import 'package:multiplayer_tic_tac_toe/repositories/game_constants.dart';
 import 'package:multiplayer_tic_tac_toe/widgets/index.dart';
+import 'package:shimmer/shimmer.dart';
 
 class GameOverPage extends StatelessWidget {
   const GameOverPage({Key key}) : super(key: key);
@@ -22,21 +23,9 @@ class GameOverPage extends StatelessWidget {
                 child: Text(
                   BlocProvider.of<GameBloc>(context).state.winnerPlayerIndex !=
                           null
-                      ? "Congratulations!"
+                      ? "Winner!"
                       : "Well, it's a draw!",
-                  style: Theme.of(context).textTheme.display1.copyWith(
-                      color: BlocProvider.of<GameBloc>(context)
-                                  .state
-                                  .winnerPlayerIndex !=
-                              null
-                          ? GameColors.playerColorsMap[
-                              BlocProvider.of<GameBloc>(context)
-                                  .state
-                                  .players[BlocProvider.of<GameBloc>(context)
-                                      .state
-                                      .winnerPlayerIndex]
-                                  .playerNumber]
-                          : Colors.grey[800]),
+                  style: Theme.of(context).textTheme.display1.copyWith(),
                 ),
               ),
             ),
@@ -54,20 +43,41 @@ class GameOverPage extends StatelessWidget {
   }
 
   Expanded buildWinnerView(BuildContext context) {
+    Map playerNames = ModalRoute.of(context).settings.arguments;
+
     return Expanded(
       flex: 4,
       child: Column(
         children: <Widget>[
           Expanded(
-            child: Icon(FontAwesomeIcons.userNinja,
-                size: Theme.of(context).textTheme.display4.fontSize,
-                color: GameColors.playerColorsMap[
-                    BlocProvider.of<GameBloc>(context)
+            child: Stack(
+              children: [
+                GameConstants.getPlayerMarkWidget(
+                    playerMark: BlocProvider.of<GameBloc>(context)
                         .state
                         .players[BlocProvider.of<GameBloc>(context)
                             .state
                             .winnerPlayerIndex]
-                        .playerNumber]),
+                        .playerMark,
+                    size: 120),
+                Opacity(
+                  opacity: 0.3,
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey.withOpacity(0.4),
+                    highlightColor: Colors.white.withOpacity(1),
+                    direction: ShimmerDirection.btt,
+                    child: GameConstants.getPlayerMarkWidget(
+                        playerMark: BlocProvider.of<GameBloc>(context)
+                            .state
+                            .players[BlocProvider.of<GameBloc>(context)
+                                .state
+                                .winnerPlayerIndex]
+                            .playerMark,
+                        size: 120),
+                  ),
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: Text(
@@ -78,16 +88,16 @@ class GameOverPage extends StatelessWidget {
                               .winnerPlayerIndex]
                           .playerNumber ==
                       PlayerNumber.PLAYER_1
-                  ? "Player 1"
-                  : "Player 2",
+                  ? playerNames["player1Name"] ?? ""
+                  : playerNames["player2Name"] ?? "",
               style: Theme.of(context).textTheme.display1.copyWith(
-                    color: GameColors.playerColorsMap[
+                    color: GameConstants.getPlayerMarkColor(
                         BlocProvider.of<GameBloc>(context)
                             .state
                             .players[BlocProvider.of<GameBloc>(context)
                                 .state
                                 .winnerPlayerIndex]
-                            .playerNumber],
+                            .playerMark),
                   ),
             ),
           )

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:multiplayer_tic_tac_toe/bloc/index.dart';
 import 'package:multiplayer_tic_tac_toe/models/index.dart';
+import 'package:multiplayer_tic_tac_toe/repositories/game_constants.dart';
 
 import 'index.dart';
 
@@ -21,7 +23,12 @@ class _GameGridState extends State<GameGrid> {
       crossAxisCount: 3,
       children: List.generate(9, (index) {
         return InkWell(
-          onTap: () {
+          enableFeedback: true,
+          excludeFromSemantics: true,
+          //splashColor: GameConstants.getPlayerMarkColor(playerMark),
+          onTap: () async {
+            await SystemChannels.platform
+                .invokeMethod<void>('HapticFeedback.selectionClick');
             if (BlocProvider.of<GameBloc>(context)
                     .state
                     .grid[index]
@@ -46,8 +53,14 @@ class _GameGridState extends State<GameGrid> {
             }
           },
           child: Container(
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: GameConstants.getPlayerMarkColor(
+                  BlocProvider.of<GameBloc>(context)
+                      .state
+                      .grid[index]
+                      .playerMark,
+                  0.2),
               borderRadius: BorderRadius.circular(15),
             ),
             child: MarkWidget(index: index),

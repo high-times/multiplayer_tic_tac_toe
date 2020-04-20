@@ -25,7 +25,7 @@ class RestartButton extends StatelessWidget {
         ),
         onPressed: () {
           BlocProvider.of<GameBloc>(context).add(GameInitialized());
-          Navigator.of(context).pushReplacementNamed('/gamePage');
+          Navigator.of(context).pushReplacementNamed('/');
         },
       ),
     );

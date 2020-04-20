@@ -42,49 +42,42 @@ class _PlayerIconState extends State<PlayerIcon> {
             .playerNumber ==
         widget.playerNumber;
 
-    Color color = GameColors.playerColorsMap[widget.playerNumber];
+    Color color = GameConstants.getPlayerMarkColor(widget.playerMark);
     color = (isCurrentPlayer) ? color : color.withOpacity(0.3);
-    return Padding(
-      padding: const EdgeInsets.only(top: 32.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Flexible(
-              child:
-                  FaIcon(FontAwesomeIcons.userNinja, size: 48, color: color)),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                (isCurrentPlayer)
-                    ? Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Icon(
-                          FontAwesomeIcons.solidCheckCircle,
-                          size: Theme.of(context).textTheme.title.fontSize,
-                          color: color,
-                        ),
-                      )
-                    : Container(),
-                Text(
-                  widget.playerName,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline
-                      .copyWith(color: color),
-                ),
-              ],
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: GameConstants.getPlayerMarkWidget(
+              playerMark: widget.playerMark,
+              size: Theme.of(context).textTheme.display3.fontSize,
             ),
           ),
-          Expanded(
-              child: Icon(
-                  widget.playerMark == PlayerMark.X
-                      ? FontAwesomeIcons.times
-                      : FontAwesomeIcons.solidDotCircle,
-                  color: color,
-                  size: Theme.of(context).textTheme.display1.fontSize))
-        ],
-      ),
+        ),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              (isCurrentPlayer)
+                  ? Icon(
+                      FontAwesomeIcons.solidCheckCircle,
+                      size: Theme.of(context).textTheme.title.fontSize,
+                      color: color,
+                    )
+                  : Container(),
+              Text(
+                widget.playerName,
+                style:
+                    Theme.of(context).textTheme.headline.copyWith(color: color),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
